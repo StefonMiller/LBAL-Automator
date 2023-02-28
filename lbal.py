@@ -46,52 +46,58 @@ def get_text_from_image(path):
 path_to_tesseract = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 # Screen locations are for 1920x1080 w/ 200% UI/text scaling
+wh = pyautogui.size()
+curr_screen_width = wh.width
+curr_screen_height = wh.height
+
+print(f'Current screen width: {curr_screen_width}\nCurrent screen height: {curr_screen_height}')
+
 
 # Can be used for both email and symbol/item addition
-header_start_x = 119
-header_start_y = 137
-header_end_x = 1796
-header_end_y = 223
+header_start_x = (119 / 1920) * curr_screen_width
+header_start_y = (137 / 1080) * curr_screen_height
+header_end_x = (1796 / 1920) * curr_screen_width
+header_end_y = (223 / 1080) * curr_screen_height
 
-spin_start_x = 0
-spin_start_y = 924
-spin_end_x = 1920
-spin_end_y = 1080
+spin_start_x = (0 / 1920) * curr_screen_width
+spin_start_y = (924 / 1080) * curr_screen_height
+spin_end_x = (1920 / 1920) * curr_screen_width
+spin_end_y = (1080 / 1080) * curr_screen_height
 
-coins_start_x = 113
-coins_start_y = 43
-coins_end_x = 260
-coins_end_y = 129
+coins_start_x = (113 / 1920) * curr_screen_width
+coins_start_y = (43 / 1080) * curr_screen_height
+coins_end_x = (260 / 1920) * curr_screen_width
+coins_end_y = (129 / 1080) * curr_screen_height
 
-item1_start_x = 151
-item1_start_y = 336
-item1_end_x = 669
-item1_end_y = 410
+item1_start_x = (151 / 1920) * curr_screen_width
+item1_start_y = (336 / 1080) * curr_screen_height
+item1_end_x = (669 / 1920) * curr_screen_width
+item1_end_y = (410 / 1080) * curr_screen_height
 
-item2_start_x = 700
-item2_start_y = 336
-item2_end_x = 1212
-item2_end_y = 410
+item2_start_x = (700 / 1920) * curr_screen_width
+item2_start_y = (336 / 1080) * curr_screen_height
+item2_end_x = (1212 / 1920) * curr_screen_width
+item2_end_y = (410 / 1080) * curr_screen_height
 
-item3_start_x = 1248
-item3_start_y = 336
-item3_end_x = 1759
-item3_end_y = 410
+item3_start_x = (1248 / 1920) * curr_screen_width
+item3_start_y = (336 / 1080) * curr_screen_height
+item3_end_x = (1759 / 1920) * curr_screen_width
+item3_end_y = (410 / 1080) * curr_screen_height
 
-spin_button_x = 962
-spin_button_y = 1015
+spin_button_x = (962 / 1920) * curr_screen_width
+spin_button_y = (1015 / 1080) * curr_screen_height
 
-skip_button_x = 965
-spin_button_y = 284
+skip_button_x = (965 / 1920) * curr_screen_width
+spin_button_y = (284 / 1080) * curr_screen_height
 
-retry_button_x = 955
-retry_button_y = 909
+retry_button_x = (955 / 1920) * curr_screen_width
+retry_button_y = (909 / 1080) * curr_screen_height
 
-email_button_x = 960
-email_button_y = 968
+email_button_x = (960 / 1920) * curr_screen_width
+email_button_y = (968 / 1080) * curr_screen_height
 
-pay_button_x = 950
-pay_button_y = 985+
+pay_button_x = (950 / 1920) * curr_screen_width
+pay_button_y = (985 / 1080) * curr_screen_height
 
 
 hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
