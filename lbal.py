@@ -106,7 +106,7 @@ win32gui.SetForegroundWindow(hwnd)
 win32gui.ShowWindow(hwnd, 9)
 
 time.sleep(.5)
-
+# 
 p = pyautogui.screenshot(region=(header_start_x, header_start_y, (header_end_x - header_start_x), (header_end_y - header_start_y)))
 p.save(r'temp.png')
 
