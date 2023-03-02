@@ -11,6 +11,16 @@ import cv2
 import math
 import numpy as np
 
+class Game:
+  spins = [5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 10]
+  payments = [25, 50, 100, 150, 225, 300, 350, 425, 575, 625, 675, 777, 1000]
+  priority_items = ['Flower', 'Bee', 'Rain', 'Coal', 'Seed', 'Farmer', 'Sun', 'Beehive', 'Honey']
+  def __init__(self):
+    self.payment_num = 0
+    self.coins = 0
+    self.symbols = ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+
+
 def mse(img1, img2):
    h, w = img1.shape
    diff = cv2.subtract(img1, img2)
@@ -42,65 +52,43 @@ def get_text_from_image(path):
     # Displaying the extracted text
     return text[:-1]
 
-def click_play_button():
-    return
-
-def click_floor_button():
-    return
-
-def click_start_button():
-    return
-
-def click_spin_button():
-    time.sleep(.5)
-    mouse.click(button='left', coords=(int(spin_button_x), int(spin_button_y)))
-    time.sleep(.5)
-
-def dismiss_email():
-    time.sleep(.5)
-    mouse.click(button='left', coords=(int(email_button_x), int(email_button_y)))
-    time.sleep(.5)
-
-def click_skip_button():
-    mouse.click(button='left', coords=(int(skip_button_x), int(skip_button_y)))
-
-
 # Determine where we currently are
 def current_screen(i):
-    # Check if at title
     p = pyautogui.screenshot()
-    p.save(rf'temp{i}.png')
-    if compare_images(rf'temp{i}.png', r'cur\home.png'):
-        print("At home screen")
+    p.save(rf'debug\temp{i}.png')
+    spin = pyautogui.locateOnScreen(r'cur\spin.png')
+    if spin:
+        print('Found spin button')
+        pyautogui.moveTo(int(spin.left + (spin.width/2)), int(spin.top + (spin.height / 2)))
+        pyautogui.click()
         return
-    elif compare_images(rf'temp{i}.png', r'cur\play.png'):
-        print('At play screen')
+    skip = pyautogui.locateOnScreen(r'cur\skip.PNG')
+    if skip:
+        print('Found skip button')
+        pyautogui.moveTo(int(skip.left + (skip.width/2)), int(skip.top + (skip.height / 2)))
+        pyautogui.click()
         return
-    p = pyautogui.screenshot(region=(spin_start_x, spin_start_y, (spin_end_x - spin_start_x), (spin_end_y - spin_start_y)))
-    p.save(rf'temp{i}.png')
-    if compare_images(rf'temp{i}.png', r'cur\spin.png'):
-        print('At spin screen')
-        click_spin_button()
+    check = pyautogui.locateOnScreen(r'cur\check.PNG')
+    if check:
+        print('Found check button')
+        pyautogui.moveTo(int(check.left + (check.width/2)), int(check.top + (check.height / 2)))
+        pyautogui.click()
         return
-    
-    # Check header
-    p = pyautogui.screenshot(region=(header_start_x, header_start_y, (header_end_x - header_start_x), (header_end_y - header_start_y)))
-    p.show
-    p.save(rf'temp{i}.png')
-    if compare_images(rf'temp{i}.png', r'cur\email.png'):
-        print('At email screen')
-        dismiss_email()
+    start = pyautogui.locateOnScreen(r'cur\start.PNG')
+    if check:
+        print('Found start button')
+        pyautogui.moveTo(int(start.left + (start.width/2)), int(start.top + (start.height / 2)))
+        pyautogui.click()
         return
-    elif compare_images(rf'temp{i}.png', r'cur\symbol.png'):
-        print('At symbol addition screen')
-        click_skip_button()
-        return
-    elif compare_images(rf'temp{i}.png', r'cur\item.png'):
-        print('At item addition screen')
+    retry = pyautogui.locateOnScreen(r'cur\retry.PNG')
+    if retry:
+        print('Found retry button')
+        pyautogui.moveTo(int(retry.left + (retry.width/2)), int(retry.top + (retry.height / 2)))
+        pyautogui.click()
         return
 
-    print('I have no idea where I\'m at, please help')
-    return
+    print('No match found')
+    
 
 # Defining paths to tesseract.exe
 # and the image we would be using
@@ -114,64 +102,20 @@ curr_screen_height = wh.height
 print(f'Current screen width: {curr_screen_width}\nCurrent screen height: {curr_screen_height}')
 
 
-# Can be used for both email and symbol/item addition
-header_start_x = math.floor((119 / 1920) * curr_screen_width)
-header_start_y = (137 / 1080) * curr_screen_height
-header_end_x = (1796 / 1920) * curr_screen_width
-header_end_y = (223 / 1080) * curr_screen_height
 
-spin_start_x = (0 / 1920) * curr_screen_width
-spin_start_y = (924 / 1080) * curr_screen_height
-spin_end_x = (1920 / 1920) * curr_screen_width
-spin_end_y = (1080 / 1080) * curr_screen_height
-
-coins_start_x = (113 / 1920) * curr_screen_width
-coins_start_y = (43 / 1080) * curr_screen_height
-coins_end_x = (260 / 1920) * curr_screen_width
-coins_end_y = (129 / 1080) * curr_screen_height
-
-item1_start_x = (151 / 1920) * curr_screen_width
-item1_start_y = (336 / 1080) * curr_screen_height
-item1_end_x = (669 / 1920) * curr_screen_width
-item1_end_y = (410 / 1080) * curr_screen_height
-
-item2_start_x = (700 / 1920) * curr_screen_width
-item2_start_y = (336 / 1080) * curr_screen_height
-item2_end_x = (1212 / 1920) * curr_screen_width
-item2_end_y = (410 / 1080) * curr_screen_height
-
-item3_start_x = (1248 / 1920) * curr_screen_width
-item3_start_y = (336 / 1080) * curr_screen_height
-item3_end_x = (1759 / 1920) * curr_screen_width
-item3_end_y = (410 / 1080) * curr_screen_height
-
-spin_button_x = (962 / 1920) * curr_screen_width
-spin_button_y = (1015 / 1080) * curr_screen_height
-
-skip_button_x = (965 / 1920) * curr_screen_width
-skip_button_y = (284 / 1080) * curr_screen_height
-
-retry_button_x = (955 / 1920) * curr_screen_width
-retry_button_y = (909 / 1080) * curr_screen_height
-
-email_button_x = (960 / 1920) * curr_screen_width
-email_button_y = (968 / 1080) * curr_screen_height
-
-pay_button_x = (950 / 1920) * curr_screen_width
-pay_button_y = (985 / 1080) * curr_screen_height
-
-# TODO: Get locations for rerolls + items when reroll is present. Get location of floor 1 select screen
-
-hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
-
-win32gui.SetForegroundWindow(hwnd)
-win32gui.ShowWindow(hwnd, 9)
-
-time.sleep(.5)
-i = 0
-while(1):
-    current_screen(i)
-    time.sleep(3)
-    i = i +1
-win32gui.ShowWindow(hwnd, 6)
+# hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
+# rect = win32gui.GetWindowRect(hwnd)
+# window_x = rect[0] + 45
+# window_y = rect[1] + 45
+# win32gui.SetForegroundWindow(hwnd)
+# win32gui.ShowWindow(hwnd, 9)
+# time.sleep(.5)
+# i = 0
+# while(1):
+#     pyautogui.moveTo(window_x, window_y)
+#     current_screen(i)
+#     time.sleep(1.5)
+#     i = i +1
+#     print('\n-------------------------------------------------------------------------------------------------------\n')
+# win32gui.ShowWindow(hwnd, 6)
 
