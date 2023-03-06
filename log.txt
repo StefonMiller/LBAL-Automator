@@ -1,0 +1,101 @@
+Current screen width: 1366
+Current screen height: 768
+Iteration 0
+Spins til payment: 5
+Current payment: 25
+Gold/spin: 5
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Coins: 0
+Need to select symbol/item
+Text segments for iteration 0: ['Pepper', 'Lime']
+Text segments for iteration 0: ['', 'Symbol', 'Small', 'exolanle}']
+Text segments for iteration 0: ['Ricky 1', 'the', 'Banana']
+Options:
+	Lime Pepper: 0 priority
+	Small Symbol Bomb: 0 priority
+	Ricky the Banana: 0 priority
+Found best item based on priority. SELECTING 
+Selecting item index 1
+
+-------------------------------------------------------------------------------------------------------
+
+Iteration 1
+Spins til payment: 5
+Current payment: 25
+Gold/spin: 5
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Coins: 0
+Found spin button
+
+-------------------------------------------------------------------------------------------------------
+
+Iteration 2
+Spins til payment: 4
+Current payment: 25
+Gold/spin: 5
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Coins: 4
+Need to select symbol/item
+Text segments for iteration 2: ['', 'Cat']
+Text segments for iteration 2: ['Crab']
+Text segments for iteration 2: ['Banana', 'Peel']
+Options:
+	Cat: 1 gold
+	Crab: 1 gold
+	Banana Peel: 1 gold
+No priority symbol options. Checking if we are falling behind on rent
+Will have 29 coins by this rent payment of 25. Not adding symbol
+
+-------------------------------------------------------------------------------------------------------
+
+Iteration 3
+Spins til payment: 4
+Current payment: 25
+Gold/spin: 5
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Coins: 4
+Found spin button
+
+-------------------------------------------------------------------------------------------------------
+
+Iteration 4
+Spins til payment: 3
+Current payment: 25
+Gold/spin: 5
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Coins: 8
+Need to select symbol/item
+Text segments for iteration 4: ['Owl']
+Text segments for iteration 4: ['Pearl']
+Text segments for iteration 4: ['Oyster']
+Options:
+	Owl: 1.3333 gold
+	Pearl: 1 gold
+	Oyster: 1 gold
+No priority symbol options. Checking if we are falling behind on rent
+Will have 33 coins by this rent payment of 25. Not adding symbol
+
+-------------------------------------------------------------------------------------------------------
+
+Iteration 5
+Spins til payment: 3
+Current payment: 25
+Gold/spin: 5
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Coins: 8
+Found spin button
+
+-------------------------------------------------------------------------------------------------------
+
+Iteration 6
+Spins til payment: 2
+Current payment: 25
+Gold/spin: 5
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Coins: 12
+Text segments for iteration 0: ['21']
+Need to select symbol/item
+Text segments for iteration 6: ['1DXoye}']
+Text segments for iteration 6: ['Light', 'Bulb']
+Text segments for iteration 6: ['Hoarding', '']
+Options:
