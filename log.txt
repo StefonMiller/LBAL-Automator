@@ -1,14 +1,13 @@
-Current screen width: 1366
-Current screen height: 768
+Current screen width: 1920
+Current screen height: 1080
 Iteration 0
 Spins til payment: 5
 Current payment: 27
 Gold/spin: 5
-Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+Symbols: ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
 Coins: 0
-Found spin button
-Found items and payments label
-updating symbols to {'Bee': 1, 'Cat': 1, 'Cherry': 1, 'Coal': 1, 'Coin': 3, 'Egg': 1, 'Flower': 1, 'Hex of Midas': 1, 'Matroyshka Doll 3': 1, 'Ore': 1, 'Peach': 1, 'Pearl': 1, 'Rabbit': 1, 'Rain': 1, 'Shiny Pebble': 3, 'Silver Arrow': 1, 'Turtle': 1, 'Urn': 1}
-Symbols: ['Bee', 'Cat', 'Cherry', 'Coal', 'Coin', 'Coin', 'Coin', 'Egg', 'Flower', 'Hex of Midas', 'Matroyshka Doll 3', 'Ore', 'Peach', 'Pearl', 'Rabbit', 'Rain', 'Shiny Pebble', 'Shiny Pebble', 'Shiny Pebble', 'Silver Arrow', 'Turtle', 'Urn']
-Current gold per spin: 27.491894736842106
-Current coins: 11023456789
+Attempting to remove bad symbol as we have 30
+Found items and removal label
+updating symbols to {'Bee': 1, 'Big Urn': 2, 'Buffing Capsule': 1, 'Cat': 2, 'Cherry': 1, 'Coal': 1, 'Coconut Half': 1, 'Coin': 1, 'Dog': 2, 'Five-Sided Die': 1, 'Flower': 2, 'Golden Egg': 1, 'Goose': 1, 'Jellyfish': 1, 'Ninja': 1, 'Orange': 1, 'Ore': 5, 'Pearl': 1, 'Pufferfish': 1, 'Rabbit Fluff': 1, 'Sapphire': 1, 'Shiny Pebble': 1, 'Turtle': 1, 'Wine': 1}
+Symbols: ['Bee', 'Big Urn', 'Big Urn', 'Buffing Capsule', 'Cat', 'Cat', 'Cherry', 'Coal', 'Coconut Half', 'Coin', 'Dog', 'Dog', 'Five-Sided Die', 'Flower', 'Flower', 'Golden Egg', 'Goose', 'Jellyfish', 'Ninja', 'Orange', 'Ore', 'Ore', 'Ore', 'Ore', 'Ore', 'Pearl', 'Pufferfish', 'Rabbit Fluff', 'Sapphire', 'Shiny Pebble', 'Turtle', 'Wine']
+Current gold per spin: 44.491894736842106

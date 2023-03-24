@@ -1,8 +1,5 @@
 from PIL import Image
 import pyautogui
-from pywinauto import Application
-from pywinauto import findwindows
-from pywinauto import mouse
 import win32gui
 import time
 import os
@@ -10,10 +7,6 @@ import cv2
 import json
 import math
 import numpy as np
-from scipy import ndimage
-import pylab as pl
-from imutils.object_detection import non_max_suppression
-from PIL import Image
 import logging
 import difflib
 import re
@@ -164,8 +157,12 @@ class Game:
         logging.info(f'Symbols: {self.symbols}')
         self.calculate_gold_per_spin()
 
-    # TODO: Figure out why locateonscreen isn't working for inventory. May need to adjust confidence or switch to template matching instead
+    # TODO: Fix removal algorithm, may be bc locatecenteronscreen isn't locating the symbol correctly
     def remove_symbols(self, syms):
+        hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
+        rect = win32gui.GetWindowRect(hwnd)
+        window_x = rect[0] + 45
+        window_y = rect[1] + 45
         lowest_g = 0  
         self.update(syms)
         while pyautogui.locateCenterOnScreen(r'cur\x.PNG') != None and lowest_g < 3:
@@ -173,17 +170,22 @@ class Game:
             lowest_sym = ''
             for cur_sym in self.symbols:
                 print(f'Current symbol for gold value {lowest_g}: {cur_sym} with value {self.all_symbols[cur_sym]}')
-                print(f'Lowest current symbol: {lowest_sym}')
                 if self.all_symbols[cur_sym] <= lowest_g and cur_sym not in self.priority_symbols and cur_sym in self.symbols:
                     lsp = cur_sym.replace(' ', '_')
                     low_sym_path = rf'cur\Symbols_3x\{lsp}.png'
+                    print(f'\t\tFound lowest current non-priority symbol {cur_sym}')
                     lsym = pyautogui.locateCenterOnScreen(low_sym_path)
                     if lsym:
-                        print(f'\t\tFound lowest current non-priority symbol {cur_sym}')
                         pyautogui.moveTo(lsym.x, lsym.y)
+                        time.sleep(0.25)
+                        pyautogui.moveTo(window_x, window_y)
+                        time.sleep(0.25)
                         self.symbols.remove(cur_sym)
                         lowest_sym = cur_sym
                         break
+                    else:
+                        print('Could not find symbol on screen!')
+                        exit(0)
             if lowest_sym == '':
                 lowest_g = lowest_g + 1
         exit(0)
@@ -196,24 +198,38 @@ def get_coins():
     if coin:
         segments = 5
         segs = []
-        # TODO: Fix coin image segmentation, then figure out why locateonscreen isn't working in remove_symbols function
+        cur_offset = coin.left + coin.width
         for i in range(0, segments):
-            p = pyautogui.screenshot(region=(((coin.left + coin.width) + (i * 16)), (coin.top + 7), 16, 24))
-            p.save(f'tmp\coins_seg{i}.png')
-            template = cv2.imread(rf'tmp\coins_seg{i}.png', 0)
-            for name in os.listdir(r'cur\nums\coin_nums'):
-                img = cv2.imread(rf'cur\nums\coin_nums\{name}', 0)
-                conf = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED).max()
-                if conf > 0.97:
-                    segs.append(name.replace('.png', '').replace('.PNG', ''))
+            p = pyautogui.screenshot(region=(cur_offset, (coin.top + 7), 16, 24))
+            img_path = rf'tmp\coins_seg{i}.png'
+            p.save(img_path)
+            closest_num = find_closest_num(img_path, r'cur\nums\coin_nums')
+            # Attempt to recrop segment if template is not a black box and we don't get a valid #
+            if not closest_num and p.getbbox():
+                # If this image isn't blank and there is no #, try cropping 20px wide
+                p = pyautogui.screenshot(region=(cur_offset, (coin.top + 7), 20, 24))
+                p.save(img_path)
+                closest_num_recropped = find_closest_num(img_path, r'cur\nums\coin_nums')
+                if closest_num_recropped:
+                    segs.append(closest_num_recropped)
+                    cur_offset = cur_offset + 20
+            elif closest_num and p.getbbox():
+                segs.append(closest_num)
+                cur_offset = cur_offset + 16
         coins = int(''.join(segs))
-        logging.info(f'Current coins: {coins}')
-        exit(0)
         return coins
     else:
         logging.info('No coin symbol found, returning')
-        exit(0)
-        return cur_game.coins
+        return None
+
+def find_closest_num(img, path):
+    template = cv2.imread(rf'{img}', 0)
+    for name in os.listdir(rf'{path}'):
+        img = cv2.imread(rf'{path}\{name}', 0)
+        conf = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED).max()
+        if conf > 0.97:
+            return name.replace('.png', '').replace('.PNG', '')
+    return None
 
 def get_selections(options, path):
     best_images = []
@@ -335,7 +351,13 @@ def current_screen(i, cur_game):
         logging.info('Found spin button')
         update_symbols(cur_game)
         time.sleep(0.5)
-        cur_game.coins = get_coins()
+        coins = get_coins()
+        if coins:
+            cur_game.coins = coins
+            logging.info(f'Updated games coin total to {coins}')
+        else:
+            logging.info('Error parsing coins, not updated')
+        exit(0)
         cur_game.spin()
         pyautogui.moveTo(int(spin.left + (spin.width/2)), int(spin.top + (spin.height / 2)))
         pyautogui.click()
@@ -439,6 +461,7 @@ logging.info(f'Current screen width: {curr_screen_width}\nCurrent screen height:
 
 
 cur_game = Game(0, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
+cur_game.symbols = ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
 hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
 rect = win32gui.GetWindowRect(hwnd)
 window_x = rect[0] + 45
