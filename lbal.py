@@ -12,18 +12,23 @@ import difflib
 import re
 
 class Game:
-    spins = [5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 10]
-    payments = [27, 65, 100, 150, 225, 300, 350, 425, 575, 625, 675, 777, 1000]
-    priority_symbols = ['Flower', 'Bee', 'Rain', 'Coal', 'Seed', 'Farmer', 'Sun', 'Beehive', 'Honey', 'Bronze Arrow', 'Silver Arrow', 'Golden Arrow', 'Buffing Capsule', 'Item Capsule', 'Lucky Capsule', 'Buffing Capsule', 'Reroll Capsule']
     synergizing_symbols = {'Flower': 1, 'Bee': 2, 'Rain': 2, 'Sun': 5}
     def __init__(self, pm, c, s, sr, gps, als, ai):
-        self.payment_num = pm
+        self.payment_due = pm
         self.coins = c
         self.symbols = s
         self.spins_remaining = sr
         self.gold_per_spin = gps
         self.all_symbols = als
         self.all_items = ai
+        self.priority_symbols = self.calculate_priority_symbols()
+
+    def calculate_priority_symbols(self):
+        priority_syms = []
+        for sym in self.all_symbols:
+            if self.all_symbols[sym]['priority'] >= 4:
+                priority_syms.append(sym)
+        return priority_syms
 
     def choose_symbol(self, symbols):
         logging.info('Options:')
@@ -33,7 +38,8 @@ class Game:
             sym = difflib.get_close_matches(sym_name, syms)
             if len(sym) > 0:
                 sym = sym[0]
-                logging.info(f'\t{sym}: {self.all_symbols[sym]} gold')
+                g = self.all_symbols[sym]['gold']
+                logging.info(f'\t{sym}: {g} gold')
                 if sym in self.priority_symbols:
                     logging.info(f'\t^Priority item, should take this')
                     priority_options[sym] = sym_name
@@ -42,11 +48,13 @@ class Game:
             logging.info("We have priority options, should take one of these")
             cur_g = 0
             cur_sym = ''
+            cur_p = 0
             for option in priority_options.keys():
                 if option != '':
-                    if self.all_symbols[option] >= cur_g:
+                    if self.all_symbols[option]['priority'] >= cur_p:
                         cur_sym = option
-                        cur_g = self.all_symbols[option]
+                        cur_g = self.all_symbols[option]['gold']
+                        cur_p = self.all_symbols[option]['priority']
             logging.info(f'OPTIONS: {priority_options}')
             logging.info(f'SELECTION: {cur_sym}')
             if cur_sym != '':
@@ -58,27 +66,29 @@ class Game:
             logging.info('No priority symbol options. Checking if we are falling behind on rent')
             logging.info(f'{self.coins} + ({self.spins_remaining} * {self.gold_per_spin}) - {self.spins_remaining}')
             expected_gold = (self.coins + ((self.spins_remaining * self.gold_per_spin) - (self.spins_remaining)))
-            if expected_gold >= self.payments[self.payment_num]:
-                logging.info(f'Will have {expected_gold} coins by this rent payment of {self.payments[self.payment_num]}. Not adding symbol')
+            if expected_gold >= self.payment_due:
+                logging.info(f'Will have {expected_gold} coins by this rent payment of {self.payment_due}. Not adding symbol')
                 return -1
             else:
-                logging.info(f'Will have {expected_gold} coins by this rent payment of {self.payments[self.payment_num]}. May need to add one of these symbols')
+                logging.info(f'Will have {expected_gold} coins by this rent payment of {self.payment_due}. May need to add one of these symbols')
                 cur_g = 0
                 cur_sym = ''
                 res = {}
+                cur_p = 0
                 for sym_name in symbols:
                     sym = difflib.get_close_matches(sym_name, syms)
                     if len(sym) > 0:
                         sym = sym[0]
                         res[sym] = sym_name
-                        if self.all_symbols[sym] >= cur_g:
+                        if self.all_symbols[sym]['priority'] >= cur_p:
                             cur_sym = sym
-                            cur_g = self.all_symbols[sym]
-                if cur_g < 2 and self.payment_num > 2:
+                            cur_g = self.all_symbols[sym]['gold']
+                            cur_p = self.all_symbols[sym]['priority']
+                if cur_p < 2 and self.payment_due > 100:
                     logging.info(f'After payment 2, cant take any of these symbols bc theyre less than 2g in value')
                     return -1
-                elif cur_g < 3 and self.payment_num > 4 and len(self.symbols) > 20:
-                    logging.info(f'After payment 4, cant take any symbols less than 3 in value')
+                elif cur_p < 3 and self.payment_due > 325 and len(self.symbols) > 20:
+                    logging.info(f'After payment 7, cant take any symbols less than 3 in value')
                     return -1
                 logging.info(f'OPTIONS: {res}')
                 logging.info(f'SELECTION: {cur_sym}')
@@ -134,19 +144,9 @@ class Game:
                     matches = (110*a*b)/(n*(n-1))
                     cur_g = cur_g + (matches * ev)
             else:
-                cur_g = cur_g + (self.all_symbols[sym] * cur_symbols[sym])
+                cur_g = cur_g + (self.all_symbols[sym]['gold'] * cur_symbols[sym])
         logging.info(f'Current gold per spin: {cur_g}')
         self.gold_per_spin = cur_g
-
-
-    def pay_rent(self):
-        # Subtract rent payment
-        self.coins = self.coins - self.payments[self.payment_num]
-        if self.coins < 0:
-            self.coins = 0
-        # Increment payment number
-        self.payment_num = self.payment_num + 1
-        self.spins_remaining = self.spins[self.payment_num]
 
     def update(self, syms):
         logging.info(f'updating symbols to {syms}')
@@ -157,41 +157,39 @@ class Game:
         logging.info(f'Symbols: {self.symbols}')
         self.calculate_gold_per_spin()
 
-    # TODO: Fix removal algorithm, may be bc locatecenteronscreen isn't locating the symbol correctly
     def remove_symbols(self, syms):
         hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
         rect = win32gui.GetWindowRect(hwnd)
         window_x = rect[0] + 45
         window_y = rect[1] + 45
-        lowest_g = 0  
-        self.update(syms)
-        while pyautogui.locateCenterOnScreen(r'cur\x.PNG') != None and lowest_g < 3:
-            print(f'Current game symbols: {self.symbols}')
+        self.update(syms)  
+        while pyautogui.locateOnScreen(r'cur\x.PNG'):
+            pyautogui.moveTo(window_x, window_y)
+            time.sleep(0.5)
+            lowest_g = 3
             lowest_sym = ''
-            for cur_sym in self.symbols:
-                print(f'Current symbol for gold value {lowest_g}: {cur_sym} with value {self.all_symbols[cur_sym]}')
-                if self.all_symbols[cur_sym] <= lowest_g and cur_sym not in self.priority_symbols and cur_sym in self.symbols:
-                    lsp = cur_sym.replace(' ', '_')
-                    low_sym_path = rf'cur\Symbols_3x\{lsp}.png'
-                    print(f'\t\tFound lowest current non-priority symbol {cur_sym}')
-                    lsym = pyautogui.locateCenterOnScreen(low_sym_path)
-                    if lsym:
-                        pyautogui.moveTo(lsym.x, lsym.y)
-                        time.sleep(0.25)
-                        pyautogui.moveTo(window_x, window_y)
-                        time.sleep(0.25)
-                        self.symbols.remove(cur_sym)
-                        lowest_sym = cur_sym
-                        break
-                    else:
-                        print('Could not find symbol on screen!')
-                        exit(0)
-            if lowest_sym == '':
-                lowest_g = lowest_g + 1
-        exit(0)
+            for sym in self.symbols:
+                if (self.all_symbols[sym]['gold'] < lowest_g) and (sym not in self.priority_symbols):
+                    lowest_g = self.all_symbols[sym]['gold']
+                    lowest_sym = sym
+            if lowest_sym != '':
+                logging.info(f'Removing symbol {lowest_sym} with gold value {lowest_g}')
+                sym_img = lowest_sym.replace(' ', '_') + '.png'
+                sym_loc = pyautogui.locateCenterOnScreen(rf'cur\Symbols_3x\{sym_img}', confidence=0.9)
+                if sym_loc:
+                    pyautogui.moveTo(sym_loc.x, sym_loc.y)
+                    time.sleep(0.25)
+                    pyautogui.click()
+                    time.sleep(0.25)
+                    self.symbols.remove(lowest_sym)
+                else:
+                    logging.info('Could not find symbol to remove!')
+                    return
+            else:
+                return
         
     def __str__(self):
-        return f"Spins til payment: {self.spins_remaining}\nCurrent payment: {self.payments[self.payment_num]}\nGold/spin: {self.gold_per_spin}\nSymbols: {self.symbols}\nCoins: {self.coins}"
+        return f"Spins til payment: {self.spins_remaining}\nCurrent payment: {self.payment_due}\nGold/spin: {self.gold_per_spin}\nSymbols: {self.symbols}\nCoins: {self.coins}"
 
 def get_coins():
     coin = pyautogui.locateOnScreen(r'cur\coin.PNG')
@@ -221,6 +219,44 @@ def get_coins():
     else:
         logging.info('No coin symbol found, returning')
         return None
+
+def update_coins_and_spins():
+    due = pyautogui.locateOnScreen(r'cur\due.PNG')
+    spins= pyautogui.locateOnScreen(r'cur\spins.PNG')
+    payment_coin = pyautogui.locateOnScreen(r'cur\payment_coin.PNG')
+    if due and spins and payment_coin:
+        spins_template = pyautogui.screenshot(region=((due.left + due.width), due.top, (spins.left - (due.left + due.width)), due.height))
+        spins_template.save(r'tmp\spins_template.png')
+        coins_due_template = pyautogui.screenshot(region=((payment_coin.left + payment_coin.width + 3), due.top + 8, (due.left - (payment_coin.left + payment_coin.width + 3)), due.height-12))
+        coins_due_template.save(r'tmp\coins_due_template.png')
+        spins = find_closest_num(r'tmp\spins_template.png', r'cur\nums\spin_nums')
+        if not spins:
+            spins = 0
+        segments = 5
+        segs = []
+        cur_offset = payment_coin.left + payment_coin.width + 3
+        for i in range(0, segments):
+            p = pyautogui.screenshot(region=(cur_offset, (payment_coin.top + 11), 16, 24))
+            img_path = rf'tmp\coins_seg{i}.png'
+            p.save(img_path)
+            closest_num = find_closest_num(img_path, r'cur\nums\coin_nums')
+            # Attempt to recrop segment if template is not a black box and we don't get a valid #
+            if not closest_num and p.getbbox():
+                # If this image isn't blank and there is no #, try cropping 20px wide
+                p = pyautogui.screenshot(region=(cur_offset, (payment_coin.top + 11), 20, 24))
+                p.save(img_path)
+                closest_num_recropped = find_closest_num(img_path, r'cur\nums\coin_nums')
+                if closest_num_recropped:
+                    segs.append(closest_num_recropped)
+                    cur_offset = cur_offset + 20
+            elif closest_num and p.getbbox():
+                segs.append(closest_num)
+                cur_offset = cur_offset + 16
+        coins = int(''.join(segs))
+        logging.info(f'{coins} coins due in {spins} spins')
+        cur_game.payment_due = int(coins)
+        cur_game.spins_remaining = int(spins)
+        
 
 def find_closest_num(img, path):
     template = cv2.imread(rf'{img}', 0)
@@ -318,7 +354,7 @@ def update_symbols(cur_game):
     if inv:
         pyautogui.moveTo(inv.x, inv.y)
         pyautogui.click()
-        time.sleep(0.5)
+        time.sleep(0.25)
         syms = get_symbols()
         cur_game.update(syms)        
     x_button = pyautogui.locateCenterOnScreen(r'cur\x.PNG')
@@ -331,10 +367,23 @@ def current_screen(i, cur_game):
     logging.info(cur_game)
     p = pyautogui.screenshot()
     p.save(rf'tmp\fullscreen.png')
-    win = pyautogui.locateOnScreen(r'cur\win.PNG')
+    win = pyautogui.locateCenterOnScreen(r'cur\win.PNG')
     if win:
         logging.info("WON GAME!!!!!!!!")
-        exit(0)
+        p = pyautogui.screenshot()
+        p.save(rf'tmp\wins\win_iteration_{i}.png')
+        pyautogui.moveTo(win.x, win.y)
+        time.sleep(0.25)
+        pyautogui.click()
+        menu_button = pyautogui.locateCenterOnScreen(r'cur\menu.PNG')
+        while not menu_button:
+            time.sleep(0.25)
+            pyautogui.scroll(-100)
+            menu_button = pyautogui.locateCenterOnScreen(r'cur\menu.PNG')
+        time.sleep(0.25)
+        pyautogui.moveTo(menu_button.x, menu_button.y)
+        pyautogui.click()
+        return -1
     remove = pyautogui.locateCenterOnScreen(r'cur\remove.png')
     # Only remove if we are over max # of symbols
     if remove and len(cur_game.symbols) > 20:
@@ -357,13 +406,17 @@ def current_screen(i, cur_game):
             logging.info(f'Updated games coin total to {coins}')
         else:
             logging.info('Error parsing coins, not updated')
-        exit(0)
+        time.sleep(0.5)
         cur_game.spin()
         pyautogui.moveTo(int(spin.left + (spin.width/2)), int(spin.top + (spin.height / 2)))
         pyautogui.click()
+        time.sleep(0.5)
         return 1
     skip = pyautogui.locateOnScreen(r'cur\skip.PNG')
     if skip:
+        logging.info('Found skip button, updating spins/coins due')
+        update_coins_and_spins()
+        time.sleep(0.25)
         logging.info('Need to select symbol/item')
         sym = pyautogui.locateOnScreen(r'cur\symbol.png')
         if sym:
@@ -416,9 +469,9 @@ def current_screen(i, cur_game):
     pay = pyautogui.locateOnScreen(r'cur\pay.PNG')
     if pay:
         logging.info('Found pay button')
+        cur_game.coins = cur_game.coins - cur_game.payment_due
         pyautogui.moveTo(int(pay.left + (pay.width/2)), int(pay.top + (pay.height / 2)))
         pyautogui.click()
-        cur_game.pay_rent()
         return 1
     check = pyautogui.locateOnScreen(r'cur\check.PNG')
     if check:
@@ -438,6 +491,12 @@ def current_screen(i, cur_game):
         pyautogui.moveTo(int(start.left + (start.width/2)), int(start.top + (start.height / 2)))
         pyautogui.click()
         return -1
+    swear_jar = pyautogui.locateCenterOnScreen(r'cur\swear_jar.PNG')
+    if swear_jar:
+        logging.info('Found swear jar pay button')
+        pyautogui.moveTo(swear_jar.x, swear_jar.y)
+        pyautogui.click()
+        return
     retry = pyautogui.locateOnScreen(r'cur\retry.PNG')
     if retry:
         logging.info('Found retry button')
@@ -446,6 +505,10 @@ def current_screen(i, cur_game):
         return -1
     
     logging.info('No match found')
+    # Try scrolling down as we might be stuck on a lategame debuff screen
+    time.sleep(0.25)
+    pyautogui.scroll(-100)
+
 
 wh = pyautogui.size()
 curr_screen_width = wh.width
@@ -459,9 +522,7 @@ logging.basicConfig(filename='log.txt',
 logging.getLogger('PIL').setLevel(logging.WARNING)
 logging.info(f'Current screen width: {curr_screen_width}\nCurrent screen height: {curr_screen_height}')
 
-
-cur_game = Game(0, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
-cur_game.symbols = ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower', 'Cat', 'Coin', 'Pearl', 'Cherry', 'Flower']
+cur_game = Game(25, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
 hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
 rect = win32gui.GetWindowRect(hwnd)
 window_x = rect[0] + 45
@@ -475,8 +536,8 @@ while(1):
     pyautogui.moveTo(window_x, window_y)
     result = current_screen(i, cur_game)
     if result == -1:
-        cur_game = Game(0, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
-    time.sleep(1.5)
+        cur_game = Game(25, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
+    time.sleep(0.5)
     i = i +1
     logging.info('\n-------------------------------------------------------------------------------------------------------\n')
 for f in os.listdir(r'tmp'):

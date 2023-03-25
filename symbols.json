@@ -1,151 +1,602 @@
 {    
-    "Amethyst":1,
-    "Anchor":1,
-    "Apple":3,
-    "Banana":1,
-    "Banana Peel":1,
-    "Bar of Soap":1,
-    "Bartender":3,
-    "Bear":2,
-    "Beastmaster":2,
-    "Bee":1.001,
-    "Beehive":3,
-    "Beer":1,
-    "Big Ore":2,
-    "Big Urn":2,
-    "Billionaire":0,
-    "Bounty Hunter":1,
-    "Bronze Arrow":0,
-    "Bubble":2,
-    "Buffing Capsule":0,
-    "Candy":1,
-    "Card Shark":2,
-    "Cat":1,
-    "Cheese":1,
-    "Chef":2,
-    "Chemical Seven":7,
-    "Cherry":1,
-    "Chick":1,
-    "Chicken":2,
-    "Clubs":1,
-    "Coal":0,
-    "Coconut":1,
-    "Coconut Half":2,
-    "Coin":1,
-    "Comedian":3,
-    "Cow":3,
-    "Crab":1,
-    "Crow":1.2,
-    "Cultist":0,
-    "Dame":2,
-    "Diamond":5,
-    "Diamonds":1,
-    "Diver":2,
-    "Dog":1,
-    "Dove":2,
-    "Dwarf":1,
-    "Egg":1,
-    "Eldritch Creature":4,
-    "Emerald":3,
-    "Essence Capsule":-12,
-    "Farmer":2,
-    "Five-Sided Die": 3,
-    "Flower":1.00000001,
-    "Frozen Fossil":0,
-    "Gambler":1,
-    "General Zaroff":1,
-    "Geologist":2,
-    "Golden Arrow":9,
-    "Golden Egg":4,
-    "Goldfish":1,
-    "Golem":0,
-    "Goose":1,
-    "Hearts":1,
-    "Hex of Destruction":-4,
-    "Hex of Draining":-4,
-    "Hex of Emptiness":-4,
-    "Hex of Hoarding":-4,
-    "Hex of Midas":-4,
-    "Hex of Tedium":-4,
-    "Hex of Thievery":-4,
-    "Highlander":6,
-    "Honey":3,
-    "Hooligan":2,
-    "Hustling Capsule":-7,
-    "Item Capsule":0,
-    "Jellyfish":2,
-    "Joker":3,
-    "Key":1,
-    "King Midas":1,
-    "Light Bulb":1.5,
-    "Lockbox":1,
-    "Lucky Capsule":0,
-    "Magic Key":2,
-    "Magpie":1.2,
-    "Martini":3,
-    "Matryoshka Doll":0,
-    "Matroyshka Doll 2": 1,
-    "Matroyshka Doll 3": 2,
-    "Matroyshka Doll 4": 3,
-    "Matroyshka Doll 5": 4,
-    "Mega Chest":3,
-    "Midas Bomb":0,
-    "Milk":1,
-    "Mine":4,
-    "Miner":1,
-    "Monkey":1,
-    "Moon":3,
-    "Mouse":1,
-    "Mrs. Fruit":2,
-    "Ninja":2,
-    "Omelette":3,
-    "Orange":2,
-    "Ore":1,
-    "Owl":1.3333,
-    "Oyster":0,
-    "Peach":2,
-    "Pear":1,
-    "Pearl":1,
-    "Pirate":2,
-    "Pinata":1,
-    "Present":1,
-    "Pufferfish":2,
-    "Rabbit":1,
-    "Rabbit Fluff":2,
-    "Rain":2,
-    "Removal Capsule":0,
-    "Reroll Capsule":0,
-    "Robin Hood":2,
-    "Ruby":3,
-    "Safe":1,
-    "Sand Dollar":2,
-    "Sapphire":2,
-    "Seed":1,
-    "Shiny Pebble":1,
-    "Silver Arrow":9,
-    "Sloth":2,
-    "Snail":1.2,
-    "Spades":1,
-    "Spirit":6,
-    "Strawberry":3,
-    "Sun":3,
-    "Target":2,
-    "Tedium Capsule":0,
-    "Thief":-1,
-    "Three-Sided Die":2,
-    "Time Capsule":0,
-    "Toddler":1,
-    "Tomb":3,
-    "Treasure Chest":2,
-    "Turtle":1.333,
-    "Urn":1,
-    "Void Creature":0,
-    "Void Fruit":0,
-    "Void Stone":0,
-    "Watermelon":4,
-    "Wealthy Capsule":0,
-    "Wildcard": 9999,
-    "Wine":2,
-    "Witch":2,
-    "Wolf":2
+    "Amethyst": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Anchor": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Apple": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Banana": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Banana Peel": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Bar of Soap": {
+        "gold": 1,
+        "priority": 2
+    },
+    "Bartender": {
+        "gold": 3,
+        "priority": 2
+    },
+    "Bear": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Beastmaster": {
+        "gold": 2,
+        "priority": 3
+    },
+    "Bee":{
+        "gold": 1,
+        "priority": 15
+    },
+    "Beehive": {
+        "gold": 3,
+        "priority": 15
+    },
+    "Beer": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Big Ore": {
+        "gold": 2,
+        "priority": 1
+    },
+    "Big Urn": {
+        "gold": 2,
+        "priority": 1
+    },
+    "Billionaire": {
+        "gold": 0,
+        "priority": -1
+    },
+    "Bounty Hunter": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Bronze Arrow":{
+        "gold": 0,
+        "priority": 4
+  },
+    "Bubble": {
+        "gold": 2,
+        "priority": 3
+    },
+    "Buffing Capsule":{
+        "gold": 0,
+        "priority": 9
+  },
+    "Candy": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Card Shark": {
+        "gold": 2,
+        "priority": 1
+    },
+    "Cat": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Cheese": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Chef": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Chemical Seven": {
+        "gold": 0,
+        "priority": 7
+    },
+    "Cherry": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Chick": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Chicken": {
+        "gold": 2,
+        "priority": 3
+    },
+    "Clubs": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Coal":{
+        "gold": 0,
+        "priority": 9
+  },
+    "Coconut": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Coconut Half": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Coin": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Comedian": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Cow": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Crab": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Crow": {
+        "gold": 1.2,
+        "priority": 1
+    },
+    "Cultist":{
+        "gold": 0,
+        "priority": -1
+  },
+    "Dame": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Diamond": {
+        "gold": 5,
+        "priority": 9
+    },
+    "Diamonds": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Diver": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Dog": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Dove": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Dwarf": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Egg": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Eldritch Creature": {
+        "gold": 4,
+        "priority": 4
+    },
+    "Emerald": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Essence Capsule": {
+        "gold": -12,
+        "priority": 0
+    },
+    "Farmer": {
+        "gold": 2,
+        "priority": 6
+    },
+    "Five-Sided Die":  {
+        "gold": 2.5,
+        "priority": 2
+    },
+    "Flower": {
+        "gold": 1,
+        "priority": 99
+    },
+    "Frozen Fossil":{
+        "gold": 0,
+        "priority": -1
+  },
+    "Gambler": {
+        "gold": 1,
+        "priority": 0
+    },
+    "General Zaroff": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Geologist": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Golden Arrow": {
+        "gold": 0,
+        "priority": 9
+    },
+    "Golden Egg": {
+        "gold": 4,
+        "priority": 4
+    },
+    "Goldfish": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Golem":{
+        "gold": 0,
+        "priority": -1
+  },
+    "Goose": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Hearts": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Hex of Destruction": {
+        "gold": 3,
+        "priority": -99
+    },
+    "Hex of Draining": {
+        "gold": 3,
+        "priority": -99
+    },
+    "Hex of Emptiness": {
+        "gold": 3,
+        "priority": -99
+    },
+    "Hex of Hoarding": {
+        "gold": 3,
+        "priority": -99
+    },
+    "Hex of Midas": {
+        "gold": 3,
+        "priority": -99
+    },
+    "Hex of Tedium": {
+        "gold": 3,
+        "priority": -99
+    },
+    "Hex of Thievery": {
+        "gold": 3,
+        "priority": -99
+    },
+    "Highlander": {
+        "gold": 6,
+        "priority": 6
+    },
+    "Honey": {
+        "gold": 3,
+        "priority": 9
+    },
+    "Hooligan": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Hustling Capsule": {
+        "gold": -7,
+        "priority": 0
+    },
+    "Item Capsule":{
+        "gold": 0,
+        "priority": 3
+  },
+    "Jellyfish": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Joker": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Key": {
+        "gold": 1,
+        "priority": 0
+    },
+    "King Midas": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Light Bulb": {
+        "gold": 1,
+        "priority": 2
+    },
+    "Lockbox": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Lucky Capsule":{
+        "gold": 0,
+        "priority": 3
+  },
+    "Magic Key": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Magpie": {
+        "gold": 1.2,
+        "priority": 1
+    },
+    "Martini": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Matryoshka Doll":{
+        "gold": 0,
+        "priority": 1
+  },
+    "Matroyshka Doll 2": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Matroyshka Doll 3":  {
+        "gold": 2,
+        "priority": 2
+    },
+    "Matroyshka Doll 4":  {
+        "gold": 3,
+        "priority": 3
+    },
+    "Matroyshka Doll 5":  {
+        "gold": 4,
+        "priority": 4
+    },
+    "Mega Chest": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Midas Bomb":{
+        "gold": 0,
+        "priority": -1
+  },
+    "Milk": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Mine": {
+        "gold": 4,
+        "priority": 1
+    },
+    "Miner": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Monkey": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Moon": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Mouse": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Mrs. Fruit": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Ninja": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Omelette": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Orange": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Omlette":  {
+        "gold": 3,
+        "priority": 3
+    },
+    "Ore": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Owl": {
+        "gold": 1.333,
+        "priority": 1.3
+    },
+    "Oyster":{
+        "gold": 1,
+        "priority": -1
+  },
+    "Peach": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Pear": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Pearl": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Pirate": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Pinata": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Present": {
+        "gold": 0,
+        "priority": 1
+    },
+    "Pufferfish": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Rabbit": {
+        "gold": 1,
+        "priority": 2
+    },
+    "Rabbit Fluff": {
+        "gold": 2,
+        "priority": 3
+    },
+    "Rain": {
+        "gold": 2,
+        "priority": 15
+    },
+    "Removal Capsule":{
+        "gold": 0,
+        "priority": 3
+  },
+    "Reroll Capsule":{
+        "gold": 0,
+        "priority": 3
+  },
+    "Robin Hood": {
+        "gold": 2.25,
+        "priority": 3
+    },
+    "Ruby": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Safe": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Sand Dollar": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Sapphire": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Seed": {
+        "gold": 1,
+        "priority": 5
+    },
+    "Shiny Pebble": {
+        "gold": 1,
+        "priority": 1
+    },
+    "Silver Arrow": {
+        "gold": 0,
+        "priority": 7
+    },
+    "Sloth": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Snail": {
+        "gold": 1.2,
+        "priority": 1.2
+    },
+    "Spades": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Spirit": {
+        "gold": 6,
+        "priority": 6
+    },
+    "Strawberry": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Sun": {
+        "gold": 3,
+        "priority": 999
+    },
+    "Target": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Tedium Capsule":{
+        "gold": 5,
+        "priority": 0
+  },
+    "Thief": {
+        "gold": -1,
+        "priority": -1
+    },
+    "Three-Sided Die": {
+        "gold": 2,
+        "priority": 1.5
+    },
+    "Time Capsule":{
+        "gold": 0,
+        "priority": 0.5
+  },
+    "Toddler": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Tomb": {
+        "gold": 3,
+        "priority": 3
+    },
+    "Treasure Chest": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Turtle": {
+        "gold": 1.33,
+        "priority": 1.33
+    },
+    "Urn": {
+        "gold": 1,
+        "priority": 0
+    },
+    "Void Creature":{
+        "gold": 0,
+        "priority": 1.5
+  },
+    "Void Fruit":{
+        "gold": 0,
+        "priority": 1.5
+  },
+    "Void Stone":{
+        "gold": 0,
+        "priority": 1.5
+  },
+    "Watermelon": {
+        "gold": 4,
+        "priority": 4
+    },
+    "Wealthy Capsule":{
+        "gold": 10,
+        "priority": 0
+  },
+    "Wildcard": {
+        "gold": 0,
+        "priority": 9
+    },
+    "Wine": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Witch": {
+        "gold": 2,
+        "priority": 2
+    },
+    "Wolf": {
+        "gold": 2,
+        "priority": 2
+    }
 }
