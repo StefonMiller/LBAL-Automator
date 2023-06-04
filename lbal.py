@@ -11,8 +11,13 @@ import logging
 import difflib
 from datetime import datetime
 
+# Class for default games (777 win achievement)
+# Upon winning, will restart game as opposed to starting endless mode
 class Game:
+    # Symbols to pick for game strategy (Flower/bee/rain/sun)
+    # Can be edited to conform to other stragegies
     synergizing_symbols = {'Flower': 1, 'Bee': 2, 'Rain': 2, 'Sun': 5}
+
     def __init__(self, pm, c, s, sr, gps, als, ai):
         self.payment_due = pm
         self.coins = c
@@ -23,6 +28,8 @@ class Game:
         self.all_items = ai
         self.priority_symbols = self.calculate_priority_symbols()
 
+    # Dynamically calculate what additional symbols we should pick on init
+    # List is computed based on the symbols json file & their associated priority
     def calculate_priority_symbols(self):
         priority_syms = []
         for sym in self.all_symbols:
@@ -30,6 +37,7 @@ class Game:
                 priority_syms.append(sym)
         return priority_syms
 
+    # From the 3 options passed in, determine which one (if any) should be taken
     def choose_symbol(self, symbols):
         logging.info('Options:')
         syms = self.all_symbols.keys()
@@ -76,6 +84,8 @@ class Game:
                 res = {}
                 cur_p = 0
                 for sym_name in symbols:
+                    # Gets closest match from all symbols to the symbol we're picking. I initially used this when attempting OCR, so I think
+                    # this can be removed but don't feel like testing/fixing if this somehow breaks the functionality
                     sym = difflib.get_close_matches(sym_name, syms)
                     if len(sym) > 0:
                         sym = sym[0]
@@ -84,9 +94,11 @@ class Game:
                             cur_sym = sym
                             cur_g = self.all_symbols[sym]['gold']
                             cur_p = self.all_symbols[sym]['priority']
+                # After payment 2, skip lower value symbols (if not rain, flower, bee, etc) since we need tos cale
                 if cur_p < 2 and self.payment_due > 100:
                     logging.info(f'After payment 2, cant take any of these symbols bc theyre less than 2g in value')
                     return -1
+                # Additional scaling for payment 7, by now we should be entirely focusing on synergies/run building
                 elif cur_p < 3 and self.payment_due > 325 and len(self.symbols) > 20:
                     logging.info(f'After payment 7, cant take any symbols less than 3 in value')
                     return -1
@@ -98,7 +110,8 @@ class Game:
                     logging.info(f'SYMBOL #: {symbols.index(res[cur_sym])}')
                     return symbols.index(res[cur_sym]) 
                 return -1
-                       
+    
+    # From current selection of items, determine which one should be taken
     def choose_item(self, items):
         logging.info('Options:')
         itms = self.all_items.keys()
@@ -114,6 +127,8 @@ class Game:
                     cur_itm = itm
                     cur_priority = self.all_items[itm]
         logging.info(f'OPTIONS: {item_names}')
+        # Attempt to pick an item that synergizes with our strategy. If not, select one based on priority
+        # assigned in the items.json file
         logging.info(f'Found best item based on priority. SELECTING {cur_itm}')
         if cur_itm != '':
             logging.info(f'ITEM #: {items.index(item_names[cur_itm])}')
@@ -121,10 +136,13 @@ class Game:
         else:
             return -1
 
+    # Update gold/spin values
     def spin(self):
         self.spins_remaining = self.spins_remaining - 1
         self.coins = self.coins + self.gold_per_spin - 1
 
+    # Used to estimate what gold we'll have by rent payment. Useful for deciding if we need to take a 
+    # bad symbol to make rent
     def calculate_gold_per_spin(self):
         cur_symbols = {}
         for symb in self.symbols:
@@ -143,6 +161,8 @@ class Game:
                 tmp_symbols.remove(sym)
                 for syn_sym in tmp_symbols:
                     b = cur_symbols[syn_sym]
+                    # Estimate how much gold we're going to get from symbols that synergize when adjacent,
+                    # equation from https://www.reddit.com/r/askmath/comments/oqev8i/probability_of_adjacent_symbols_in_luck_be_a/
                     ev = self.synergizing_symbols[syn_sym]
                     matches = (110*a*b)/(n*(n-1))
                     cur_g = cur_g + (matches * ev)
@@ -151,6 +171,9 @@ class Game:
         logging.info(f'Current gold per spin: {cur_g}')
         self.gold_per_spin = cur_g
 
+    # Update list of current symbols pased on dict passed in
+    # Dict is in item: count format, we parse this to a list of 
+    # items. So item: 2 would conver to [item, item]
     def update(self, syms):
         logging.info(f'updating symbols to {syms}')
         self.symbols = []
@@ -160,6 +183,7 @@ class Game:
         logging.info(f'Symbols: {self.symbols}')
         self.calculate_gold_per_spin()
 
+    # Remove symbols based on their associated gold values (Except for priority/synergizing symbols)
     def remove_symbols(self, syms):
         hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
         rect = win32gui.GetWindowRect(hwnd)
@@ -194,7 +218,11 @@ class Game:
     def __str__(self):
         return f"Spins til payment: {self.spins_remaining}\nCurrent payment: {self.payment_due}\nGold/spin: {self.gold_per_spin}\nSymbols: {self.symbols}\nCoins: {self.coins}"
 
+# Class for guillotine essence achievements. The Game class object is converted to a GuillotineGame
+# upon winning the game. From there, it will continue in endless mode and try to add the
+# guillotine essence item. The strategy used for 1B coins is 19 suns + 1 flower + Clear Skies
 class GuillotineGame(Game):
+    # Converts a game object to a GuillotineGame
     def __init__(self, game):
         self.payment_due = 0
         self.coins = game.coins
@@ -203,6 +231,7 @@ class GuillotineGame(Game):
         self.gold_per_spin = game.gold_per_spin
         self.all_symbols = game.all_symbols
         self.all_items = game.all_items
+        # Only need 1 flower for strategy, so don't take any more
         if 'Flower' in self.symbols:
             logging.info("Already have flower, only need suns now")
             self.flower_count = 1
@@ -213,6 +242,7 @@ class GuillotineGame(Game):
         self.priority_symbols = ['Removal Capsule', 'Reroll Capsule', 'Lucky Capsule', 'Essence Capsule']
         self.priority_items = ['Guillotine', 'Cardboard Box', 'Sunglasses', 'Clear Sky', 'Recycling', 'Lucky Carrot', 'Dishwasher', 'Golden Carrot']
 
+    # From the 3 options passed in, determine which one (if any) should be taken
     def choose_symbol(self, symbols):
         logging.info(symbols)
         for sym in symbols:
@@ -222,6 +252,7 @@ class GuillotineGame(Game):
         logging.info('Not taking anything')
         return -1
     
+    # From the 3 options passed in, determine which one (if any) should be taken
     def choose_item(self, items):
         logging.info(f'items: {items}')
         for priority_itm in self.priority_items:
@@ -232,13 +263,18 @@ class GuillotineGame(Game):
         logging.info('Not taking anything')
         return -1
 
+    # Update spin/gold count
     def spin(self):
         self.spins_remaining = self.spins_remaining - 1
         self.coins = self.coins + self.gold_per_spin - 1
 
+    # Don't need to do this after winning as rent payment is 0
     def calculate_gold_per_spin(self):
         pass
-
+    
+    # Update list of current symbols pased on dict passed in
+    # Dict is in item: count format, we parse this to a list of 
+    # items. So item: 2 would conver to [item, item]
     def update(self, syms):
         logging.info(f'updating symbols to {syms}')
         self.symbols = []
@@ -254,6 +290,7 @@ class GuillotineGame(Game):
                 self.symbols.append(sym)
         logging.info(f'Symbols: {self.symbols}')
 
+    # Remove symbols based on their associated gold values (Except for priority/synergizing symbols)
     def remove_symbols(self, syms):
         hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
         rect = win32gui.GetWindowRect(hwnd)
@@ -287,6 +324,8 @@ class GuillotineGame(Game):
     def __str__(self):
         return "This is a guillotine game"
 
+# Get current amount of coins we have after each spin. Finds the coin image and parses each digit using
+# image pattern matching. 
 def get_coins():
     coin = pyautogui.locateOnScreen(r'cur\coin.PNG')
     if coin:
@@ -316,6 +355,7 @@ def get_coins():
         logging.info('No coin symbol found, returning')
         return None
 
+# Update how many coins and spins remaining we have for the current game
 def update_coins_and_spins():
     due = pyautogui.locateOnScreen(r'cur\due.PNG')
     spins= pyautogui.locateOnScreen(r'cur\spins.PNG')
@@ -353,7 +393,7 @@ def update_coins_and_spins():
         cur_game.payment_due = int(coins)
         cur_game.spins_remaining = int(spins)
         
-
+# Given an image, attempts to match the correct digit associated with it
 def find_closest_num(img, path):
     template = cv2.imread(rf'{img}', 0)
     for name in os.listdir(rf'{path}'):
@@ -363,6 +403,7 @@ def find_closest_num(img, path):
             return name.replace('.png', '').replace('.PNG', '')
     return None
 
+# Get the current item/symbol selections we have to choose from
 def get_selections(options, path):
     best_images = []
     for option in options:
@@ -378,25 +419,26 @@ def get_selections(options, path):
         best_images.append(best_image)
     return best_images
 
+# This probably shouldn't be a method, not sure why moved this to a function
 def skip(skip_button):
     pyautogui.moveTo(int(skip_button.left + (skip_button.width/2)), int(skip_button.top + (skip_button.height / 2)))
     pyautogui.click()
 
 
-
+# Check if 2 boxes are intersecting
 def intersected(bottom_left1, top_right1, bottom_left2, top_right2):
     if top_right1[0] < bottom_left2[0] or bottom_left1[0] > top_right2[0]:
         return 0
-
     if top_right1[1] < bottom_left2[1] or bottom_left1[1] > top_right2[1]:
         return 0
-
     return 1
 
+# Returns a list of all symbols that we have in our inventory. Used for removing/updating current symbols
 def get_symbols():
     items_label = pyautogui.locateOnScreen(r'cur\items_inv.PNG', confidence=0.95)
     payments_label = pyautogui.locateOnScreen(r'cur\payments_inv.PNG', confidence=0.95)
     removal_label = pyautogui.locateOnScreen(r'cur\removal_inv.PNG', confidence=0.95)
+    # Inventory layout can change depending on the game state. Need to crop the image differently depending on this
     if items_label and payments_label:
         logging.info('Found items and payments label')
         symbols_img = pyautogui.screenshot(region=((items_label.left), (payments_label.top + 50), items_label.width + 850, (items_label.top - (payments_label.top))))
@@ -415,6 +457,7 @@ def get_symbols():
         symbols_img.save(r'tmp\symbols.png')
     template = cv2.imread(r'tmp\symbols.png', 1)
     syms = {}
+    # Use template matching to determien what symbols are in the invenotry. Pixel values needed to be tested and calculated manually
     for name in os.listdir(r'cur\Symbols_3x'):
         img = cv2.imread(rf'cur\Symbols_3x\{name}', 1)
         conf = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED)
@@ -444,7 +487,8 @@ def get_symbols():
                             syms[sym_name] = count
                         break
     return syms
-   
+
+# Updates Game object w/ the current symbols we have in the inventory using pattern matching
 def update_symbols(cur_game):
     inv = pyautogui.locateCenterOnScreen(r'cur\inventory.PNG')
     if inv:
@@ -458,7 +502,7 @@ def update_symbols(cur_game):
         pyautogui.moveTo(x_button.x, x_button.y)
         pyautogui.click()
 
-# Determine where we currently are
+# Determine what screen we're currently looking at
 def current_screen(cur_game):
     logging.info(cur_game)
     p = pyautogui.screenshot()
@@ -630,6 +674,7 @@ logging.basicConfig(filename='log.txt',
 logging.getLogger('PIL').setLevel(logging.WARNING)
 logging.info(f'Current screen width: {curr_screen_width}\nCurrent screen height: {curr_screen_height}')
 
+# Initialize game object w/ default values based on a new game
 cur_game = Game(25, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
 hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
 rect = win32gui.GetWindowRect(hwnd)
@@ -644,6 +689,11 @@ while(1):
     pyautogui.moveTo(window_x, window_y)
     result = current_screen(cur_game)
     logging.info(f'Result of last iteration: {result}')
+    # current_screen has a return value which indicated whether or not we should:
+    # -1: Create a new game object (Game over/restart)
+    # -2: Convert the current game to a Guillotine game object (Won the game and are now in endless mode)
+    # A flag can be inserted here depending on whether or not you want to go for the Guillotine achievements, or you can comment
+    # out the -2 return if statement
     if result == -1:
         logging.info('Making new game')
         cur_game = Game(25, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
