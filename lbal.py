@@ -9,7 +9,7 @@ import math
 import numpy as np
 import logging
 import difflib
-import re
+from datetime import datetime
 
 class Game:
     synergizing_symbols = {'Flower': 1, 'Bee': 2, 'Rain': 2, 'Sun': 5}
@@ -115,8 +115,11 @@ class Game:
                     cur_priority = self.all_items[itm]
         logging.info(f'OPTIONS: {item_names}')
         logging.info(f'Found best item based on priority. SELECTING {cur_itm}')
-        logging.info(f'ITEM #: {items.index(item_names[cur_itm])}')
-        return items.index(item_names[cur_itm])
+        if cur_itm != '':
+            logging.info(f'ITEM #: {items.index(item_names[cur_itm])}')
+            return items.index(item_names[cur_itm])
+        else:
+            return -1
 
     def spin(self):
         self.spins_remaining = self.spins_remaining - 1
@@ -165,7 +168,7 @@ class Game:
         self.update(syms)  
         while pyautogui.locateOnScreen(r'cur\x.PNG'):
             pyautogui.moveTo(window_x, window_y)
-            time.sleep(0.5)
+            time.sleep(0.25)
             lowest_g = 3
             lowest_sym = ''
             for sym in self.symbols:
@@ -190,6 +193,99 @@ class Game:
         
     def __str__(self):
         return f"Spins til payment: {self.spins_remaining}\nCurrent payment: {self.payment_due}\nGold/spin: {self.gold_per_spin}\nSymbols: {self.symbols}\nCoins: {self.coins}"
+
+class GuillotineGame(Game):
+    def __init__(self, game):
+        self.payment_due = 0
+        self.coins = game.coins
+        self.symbols = game.symbols
+        self.spins_remaining = game.spins_remaining
+        self.gold_per_spin = game.gold_per_spin
+        self.all_symbols = game.all_symbols
+        self.all_items = game.all_items
+        if 'Flower' in self.symbols:
+            logging.info("Already have flower, only need suns now")
+            self.flower_count = 1
+        else:
+            logging.info('Also need to find 1 flower')
+            self.flower_count = 0
+        self.sun_count = 0
+        self.priority_symbols = ['Removal Capsule', 'Reroll Capsule', 'Lucky Capsule', 'Essence Capsule']
+        self.priority_items = ['Guillotine', 'Cardboard Box', 'Sunglasses', 'Clear Sky', 'Recycling', 'Lucky Carrot', 'Dishwasher', 'Golden Carrot']
+
+    def choose_symbol(self, symbols):
+        logging.info(symbols)
+        for sym in symbols:
+            if (sym == 'Flower' and self.flower_count < 1) or (sym == 'Sun' and self.sun_count < 19) or (sym in self.priority_symbols): 
+                logging.info(f'Taking {sym}')
+                return symbols.index(sym)
+        logging.info('Not taking anything')
+        return -1
+    
+    def choose_item(self, items):
+        logging.info(f'items: {items}')
+        for priority_itm in self.priority_items:
+            for item in items:
+                if item == priority_itm:
+                    logging.info(f'Taking {item}')
+                    return items.index(item)
+        logging.info('Not taking anything')
+        return -1
+
+    def spin(self):
+        self.spins_remaining = self.spins_remaining - 1
+        self.coins = self.coins + self.gold_per_spin - 1
+
+    def calculate_gold_per_spin(self):
+        pass
+
+    def update(self, syms):
+        logging.info(f'updating symbols to {syms}')
+        self.symbols = []
+        if 'Flower' not in syms.keys():
+            self.flower_count = 0
+        for sym in syms.keys():
+            # Only want 1 flower for 1b coins
+            if sym == 'Flower':
+                self.flower_count = syms[sym]
+            elif sym == 'Sun':
+                self.sun_count = syms[sym]
+            for i in range(0, syms[sym]):
+                self.symbols.append(sym)
+        logging.info(f'Symbols: {self.symbols}')
+
+    def remove_symbols(self, syms):
+        hwnd = win32gui.FindWindow(None, 'Luck Be a Landlord')
+        rect = win32gui.GetWindowRect(hwnd)
+        window_x = rect[0] + 45
+        window_y = rect[1] + 45
+        self.update(syms)  
+        while pyautogui.locateOnScreen(r'cur\x.PNG'):
+            pyautogui.moveTo(window_x, window_y)
+            time.sleep(0.25)
+            rem_sym = ''
+            for sym in self.symbols:
+                if (sym != 'Sun' and sym != 'Flower' and sym not in self.priority_symbols) or (sym == 'Flower' and self.flower_count > 1) or (sym == 'Sun' and self.sun_count > 19):
+                    rem_sym = sym
+            if rem_sym != '':
+                logging.info(f'Removing symbol {rem_sym}')
+                sym_img = rem_sym.replace(' ', '_') + '.png'
+                sym_loc = pyautogui.locateCenterOnScreen(rf'cur\Symbols_3x\{sym_img}', confidence=0.9)
+                if sym_loc:
+                    pyautogui.moveTo(sym_loc.x, sym_loc.y)
+                    time.sleep(0.25)
+                    pyautogui.click()
+                    time.sleep(0.25)
+                    self.symbols.remove(rem_sym)
+                    self.flower_count = self.flower_count - 1
+                else:
+                    logging.info('Could not find symbol to remove!')
+                    return
+            else:
+                return
+
+    def __str__(self):
+        return "This is a guillotine game"
 
 def get_coins():
     coin = pyautogui.locateOnScreen(r'cur\coin.PNG')
@@ -278,7 +374,7 @@ def get_selections(options, path):
             conf = cv2.matchTemplate(img, template, cv2.TM_CCOEFF_NORMED).max()
             if conf > max_conf:
                 max_conf = conf
-                best_image = name.replace('.png', '').replace('.PNG', '').replace('_', ' ').replace('ESS', '')
+                best_image = name.replace('.png', '').replace('.PNG', '').replace('_ESS', '').replace('_', ' ')
         best_images.append(best_image)
     return best_images
 
@@ -363,54 +459,52 @@ def update_symbols(cur_game):
         pyautogui.click()
 
 # Determine where we currently are
-def current_screen(i, cur_game):
+def current_screen(cur_game):
     logging.info(cur_game)
     p = pyautogui.screenshot()
     p.save(rf'tmp\fullscreen.png')
     win = pyautogui.locateCenterOnScreen(r'cur\win.PNG')
     if win:
-        logging.info("WON GAME!!!!!!!!")
-        p = pyautogui.screenshot()
-        p.save(rf'tmp\wins\win_iteration_{i}.png')
-        pyautogui.moveTo(win.x, win.y)
-        time.sleep(0.25)
-        pyautogui.click()
-        menu_button = pyautogui.locateCenterOnScreen(r'cur\menu.PNG')
-        while not menu_button:
+        endless_button = pyautogui.locateCenterOnScreen(r'cur\endless.PNG')
+        while not endless_button:
             time.sleep(0.25)
             pyautogui.scroll(-100)
-            menu_button = pyautogui.locateCenterOnScreen(r'cur\menu.PNG')
+            endless_button = pyautogui.locateCenterOnScreen(r'cur\endless.PNG')
         time.sleep(0.25)
-        pyautogui.moveTo(menu_button.x, menu_button.y)
+        pyautogui.moveTo(endless_button.x, endless_button.y)
         pyautogui.click()
-        return -1
+        logging.info('Won game!')
+        return -2
     remove = pyautogui.locateCenterOnScreen(r'cur\remove.png')
     # Only remove if we are over max # of symbols
-    if remove and len(cur_game.symbols) > 20:
+    if remove and ((len(cur_game.symbols) > 20 and type(cur_game) is Game) or (type(cur_game) is GuillotineGame)):
         logging.info(f'Attempting to remove bad symbol as we have {len(cur_game.symbols)}')
         pyautogui.moveTo(remove.x, remove.y)
         pyautogui.click()
-        time.sleep(0.5)
+        time.sleep(0.25)
         syms = get_symbols()
-        cur_game.remove_symbols(syms)  
-        return 1
-        
+        cur_game.remove_symbols(syms)
+        x_button = pyautogui.locateCenterOnScreen(r'cur\x.PNG')
+        if x_button:
+            pyautogui.moveTo(x_button.x, x_button.y)
+            pyautogui.click()
+            time.sleep(0.25)
     spin = pyautogui.locateOnScreen(r'cur\spin.png')
     if spin:
         logging.info('Found spin button')
         update_symbols(cur_game)
-        time.sleep(0.5)
+        time.sleep(0.25)
         coins = get_coins()
         if coins:
             cur_game.coins = coins
             logging.info(f'Updated games coin total to {coins}')
         else:
             logging.info('Error parsing coins, not updated')
-        time.sleep(0.5)
+        time.sleep(0.25)
         cur_game.spin()
         pyautogui.moveTo(int(spin.left + (spin.width/2)), int(spin.top + (spin.height / 2)))
         pyautogui.click()
-        time.sleep(0.5)
+        time.sleep(0.25)
         return 1
     skip = pyautogui.locateOnScreen(r'cur\skip.PNG')
     if skip:
@@ -503,6 +597,20 @@ def current_screen(i, cur_game):
         pyautogui.moveTo(int(retry.left + (retry.width/2)), int(retry.top + (retry.height / 2)))
         pyautogui.click()
         return -1
+    pepper = pyautogui.locateCenterOnScreen(r'cur\pepper.PNG')
+    if pepper:
+        logging.info('Found pepper selection from pepper item')
+        pyautogui.moveTo(pepper.x, pepper.y)
+        pyautogui.click()
+        return 1
+    column_respin = pyautogui.locateCenterOnScreen(r'cur\column.PNG')
+    if column_respin:
+        logging.info('Found column respin text for oil can item')
+        oil_can_x = pyautogui.locateCenterOnScreen(r'cur\oil_can_x.PNG')
+        pyautogui.moveTo(oil_can_x.x, oil_can_x.y)
+        pyautogui.click()
+        return 1
+
     
     logging.info('No match found')
     # Try scrolling down as we might be stuck on a lategame debuff screen
@@ -534,14 +642,18 @@ i = 0
 while(1):
     logging.info(f'Iteration {i}')
     pyautogui.moveTo(window_x, window_y)
-    result = current_screen(i, cur_game)
+    result = current_screen(cur_game)
+    logging.info(f'Result of last iteration: {result}')
     if result == -1:
+        logging.info('Making new game')
         cur_game = Game(25, 0, ['Cat', 'Coin', 'Pearl', 'Cherry', 'Flower'], 5, 5, json.load(open(r'symbols.json')), json.load(open(r'items.json')))
-    time.sleep(0.5)
+    elif result == -2:
+        logging.info('Creating new guillotine game')
+        cur_game = GuillotineGame(cur_game)
+    time.sleep(0.25)
     i = i +1
     logging.info('\n-------------------------------------------------------------------------------------------------------\n')
-for f in os.listdir(r'tmp'):
-    os.remove(rf'tmp\{f}')
-exit(0)
-win32gui.ShowWindow(hwnd, 6)
+
+        
+
 
