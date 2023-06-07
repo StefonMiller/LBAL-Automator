@@ -12,7 +12,7 @@ Wins
 * 500 wins 4/15 (11 days)
 * 777 wins 4/29(14 days)
 
-Using this script, you get ~2 wins per hour. So it would take 16 days on average to get all of the win-related achievements
+Using this script, you get ~1 wins per hour. So it would take ~32 days on average to get all of the win-related achievements
 
 
 Guillotine Obliterations
